@@ -1,0 +1,25 @@
+{
+  "name": "qseminar",
+  "version": "1.0.0",
+  "description": "Unicorn startup tech company that will help billions of children with their homework. To the moon!",
+  "main": "app.js",
+  "type": "commonjs",
+  "dependencies": {
+    "chartjs": "^0.3.24",
+    "express": "4.18.2",
+    "mathjs": "^11.5.1",
+    "nerdamer": "^1.1.13",
+    "tesseract.js": "2.1.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Seminar",
+    "math",
+    "unicorn",
+    "startup"
+  ],
+  "author": "Sergio Santiago",
+  "license": "ISC"
+}

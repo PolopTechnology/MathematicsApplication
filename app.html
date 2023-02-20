@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <p><input type="file"  accept="image/*" name="image" id="file"  onchange="loadFile(event)" style="display: none;"></p>
+        <p><label for="file" style="cursor: pointer;">Upload Image</label></p>
+        <p><img id="output" width="200" /></p>
+        <canvas id="myChart" style="width:100%;max-width:600px"></canvas>
+        <p id="para"></p>
+        <p id="para2"></p>
+        <p id="alge"></p>
+        <button onclick="getDataOfAlgebraEquation()">Algebra</button>
+        <button onclick="getDataOfSeminarEquation()">Seminar</button>
+
+        <!--Module Imports-->
+        <script src="https://cdn.jsdelivr.net/npm/nerdamer@latest/nerdamer.core.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/nerdamer@latest/Algebra.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/nerdamer@latest/Calculus.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/nerdamer@latest/Solve.js"></script>
+        <script src='https://unpkg.com/tesseract.js@v2.1.1/dist/tesseract.min.js'></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+
+        <script>
+        var loadFile = function(event) {
+            var image = document.getElementById('output');
+            image.src = URL.createObjectURL(event.target.files[0]);
+            PROCESS_URL = image.src;
+            onUploadFile(PROCESS_URL);
+        };
+        </script> 
+        <script>
+            let txt = [];
+            function cloneArray(arr) {
+                newArr = [];
+                for (var i = 0; i < arr.length; i++) {
+                    newArr.push(arr[i]);
+                }
+                return newArr;
+            }
+
+            function alphabetList() {
+                return ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+            }
+
+            function onUploadFile(url) {
+                Tesseract.recognize(
+                    url, 'eng',
+                    { logger: m => console.log(m) }
+                ).then(({ data: { text } }) => {
+                    txt.push(text);
+                })
+            }
+
+            function generateGraph(xValues, yValues, equation) {
+                new Chart("myChart", {
+                    type: "line",
+                    data: {
+                        labels: xValues,
+                        datasets: [{
+                        fill: false,
+                        pointRadius: 2,
+                        borderColor: "rgba(0,0,255,0.5)",
+                        data: yValues
+                        }]
+                    },    
+                    options: {
+                        legend: {display: false},
+                        title: {
+                        display: true,
+                        text: equation,
+                        fontSize: 16
+                        }
+                    }
+                });
+            }
+
+            function getDataOfAlgebraEquation() {
+                var placehold = txt[0].split("=");
+                placehold = placehold[0] 
+                let O_E_VAR;
+                for(var i = 0; i < placehold.length; i++){
+                    if(alphabetList().includes(placehold[i])){
+                        O_E_VAR = placehold[i];
+                    }
+                }
+                console.log(txt[0]);
+                var solvedX = nerdamer.solve(txt[0], O_E_VAR)
+                document.getElementById("alge").innerHTML = "RESULTADO DE LA ECUACION DE ALGEBRA: " + solvedX;
+            }
+
+            function getDataOfSeminarEquation() {
+                //generate x values
+                GENERATED_X_VALUES = [];
+                for (var i = 0; i < 5; i++) {
+                    var num = Math.floor(Math.random()*10) + 1;
+                    num *= Math.round(Math.random()) ? 1 : -1;
+                    GENERATED_X_VALUES.push(num);
+                }
+
+                //preprocess equation
+                let amendedText = txt[0];
+                amendedText = amendedText.split('=');
+                let equationLoop = [];
+                for (var i = 0; i < amendedText[1].length; i++) {
+                    equationLoop.push(amendedText[1].charAt(i));
+                }
+
+                let E_VAR;
+
+                //Loop through equations and replace x values
+                LIST_OF_EQUATIONS = [];
+                for (var j = 0; j < GENERATED_X_VALUES.length; j++){
+                    let eqLoop = cloneArray(equationLoop);
+                    for (var i = 0; i < eqLoop.length; i++) {
+                        if(alphabetList().includes(eqLoop[i])) {
+                            E_VAR = eqLoop[i];
+                            eqLoop[i] = "* " + GENERATED_X_VALUES[j];
+                        }
+                    }
+                    LIST_OF_EQUATIONS.push(eqLoop.join(" "));
+                }
+
+                
+                //Get Y values
+                Y_VALUES = [];
+                for (var i = 0; i < LIST_OF_EQUATIONS.length; i++) {
+                    console.log(LIST_OF_EQUATIONS);
+                    Y_VALUES.push(eval(LIST_OF_EQUATIONS[i].toString()));
+                }
+                generateGraph(GENERATED_X_VALUES, Y_VALUES, equationLoop.join(""));
+                document.getElementById("para").innerHTML = E_VAR + ": " + GENERATED_X_VALUES;
+                document.getElementById("para2").innerHTML = amendedText[0] + ": " + Y_VALUES;
+            }
+        </script>    
+    </body>
+</html>
